@@ -160,24 +160,13 @@ Licensed under the BSD-2-Clause License.
                     return _this.fire('hovermove', evt.pageX - offset.left, evt.pageY - offset.top);
                 });
             }
-            if (this.options.resize) {
-                if(this.options.resizeBasedOnParent){
-                    var resizeObserver = new ResizeObserver( evt=>{
-                        if (_this.timeoutId != null) {
-                            window.clearTimeout(_this.timeoutId);
-                        }
-                        return _this.timeoutId = window.setTimeout(_this.resizeHandler, 100);
-                    });
-                    resizeObserver.observe(this.el[0]);
-                }
-                else{
-                    $(window).bind('resize', function (evt) {
-                        if (_this.timeoutId != null) {
-                            window.clearTimeout(_this.timeoutId);
-                        }
-                        return _this.timeoutId = window.setTimeout(_this.resizeHandler, 100);
-                    });
-                }
+            if (this.options.resize && !this.options.resizeBasedOnParent) {
+                $(window).bind('resize', function (evt) {
+                    if (_this.timeoutId != null) {
+                        window.clearTimeout(_this.timeoutId);
+                    }
+                    return _this.timeoutId = window.setTimeout(_this.resizeHandler, 100);
+                });
             }
             this.el.css('-webkit-tap-highlight-color', 'rgba(0,0,0,0)');
             if (this.postInit) {
@@ -213,7 +202,8 @@ Licensed under the BSD-2-Clause License.
             eventLineColors: ['#005a04', '#ccffbb', '#3a5f0b', '#005502'],
             rangeSelect: null,
             rangeSelectColor: '#eef',
-            resize: false
+            resize: false,
+            resizeBasedOnParent:false
         };
 
         Grid.prototype.setData = function (data, redraw) {
@@ -1700,7 +1690,7 @@ Licensed under the BSD-2-Clause License.
                     let _isPlaceAvailable=false;
                     for(;_labelCheck>=0;_labelCheck--){
                         if(_results[_labelCheck] !== undefined){
-                            let _tempLabel = _labelRef[_labelCheck] !== undefined ? _labelRef[_labelCheck]?.attrs?.text : undefined;
+                            let _tempLabel = (_labelRef[_labelCheck] !== undefined && _labelRef[_labelCheck] !== null) ? _labelRef[_labelCheck].attrs !== null ? _labelRef[_labelCheck].attrs.text : undefined : undefined;
                             if(_tempLabel !== undefined ? (_tempLabel.includes("\n") && !_tempLabel.includes("\n~")) : false){
                                 _isPlaceAvailable = false;
                                 break;
@@ -2049,7 +2039,7 @@ Licensed under the BSD-2-Clause License.
             return _results;
         };
 
-        Donut.prototype.setData = function (data, defaultSelectData = null, defaultSelectText = null) {//options has added to update the center text.thaya
+        Donut.prototype.setData = (function (data, defaultSelectData, defaultSelectText) {//options has added to update the center text.thaya
             var row;
             this.data = data;
             if (defaultSelectData !== null && defaultSelectData !== undefined)//here we update the defaultSelectData to change the center text values.thaya
@@ -2067,7 +2057,7 @@ Licensed under the BSD-2-Clause License.
                 return _results;
             }).call(this);
             return this.redraw();
-        };
+        });
 
         Donut.prototype.click = function (idx) {
             return this.fire('click', idx, this.data[idx]);
