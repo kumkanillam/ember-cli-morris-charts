@@ -1,10 +1,21 @@
 import Ember from 'ember';
 
-export
-default Ember.Component.extend({
+export default Ember.Component.extend({
     instance: false,
     options: {},
-    renderChart: function() {
+
+    didInsertElement(){
+        this.renderChart();
+    },
+    willDestroyElement(){
+        if (this.instance) {
+            this.instance.on('click', null);
+            this.instance.on('hover', null);
+            this.instance.on('hoverOut', null);
+        }
+    },
+    
+    renderChart(){
         var type = this.get('type');
 
         if (typeof type !== 'string') {
@@ -26,7 +37,7 @@ default Ember.Component.extend({
         } else if (type === 'donut') {
             this.renderDonut();
         }
-    }.on('didInsertElement'),
+    },
     setOptions: function() {
         var options = this.get('options');
 
@@ -34,6 +45,10 @@ default Ember.Component.extend({
         options.data = this.get('data');
         options.ykeys = this.get('resize') ? this.get('resize') : false;
 
+        if(this.get('resizeBasedOnParent')){
+            options.resizeBasedOnParent = this.get('resizeBasedOnParent')
+        }
+        
         if (this.get('xKey')) {
             options.xkey = this.get('xKey');
         }
@@ -52,6 +67,10 @@ default Ember.Component.extend({
 
         if (this.get('lineColors')) {
             options.lineColors = this.get('lineColors');
+        }
+
+        if (this.get('barColors')) {
+            options.barColors = this.get('barColors');
         }
 
         if (this.get('lineWidth')) {
@@ -166,6 +185,46 @@ default Ember.Component.extend({
             options.parseTime = false;
         }
 
+        if (this.get('barSizeRatio')) {
+            options.barSizeRatio = this.get('barSizeRatio');
+        }
+
+        if (this.get('yLabelFormat')) {
+            options.yLabelFormat = function (y) { return y != Math.round(y) ? '' : y; };
+        }
+        //showDefault - true then it will display maximum value selected.   -false it will display nothing as selected.
+        if (this.get('showDefault') !== undefined) {
+            options.showDefault = this.get('showDefault');
+        }
+        //true - On mouseLeave it will deselect currently selected segment and call Donut deselect and callback our called Component hoverOutDonutSegCallback method
+        if (this.get('isDeselectConfigured') !== undefined) {
+            options.isDeselectConfigured = this.get('isDeselectConfigured');
+        }
+        //this is applicable only isDeselectConfigured - true
+        if (this.get('defaultSelectText') !== undefined) {
+            options.defaultSelectText = this.get('defaultSelectText');
+        }
+        //this is applicable only isDeselectConfigured - true
+        if (this.get('defaultSelectData') !== undefined) {
+            options.defaultSelectData = this.get('defaultSelectData');
+        }
+        //For the first time rendering it should my Label and My Text in Donut as selected. like All LicensedUsers and its count
+        if (this.get('showMyDefaultLabelValueFirstTime') !== undefined) {
+            options.showMyDefaultLabelValueFirstTime = this.get('showMyDefaultLabelValueFirstTime');
+        }
+
+        if (this.get('click')) {
+            options.click = this.get('click');
+        }
+
+        if (this.get('stacked')) {
+            options.stacked = this.get('stacked');
+        }
+
+        if (this.get('yLogScale')) {
+            options.yLogScale = this.get('yLogScale');
+        }
+
         this.set('options', options);
         return options;
     },
@@ -178,19 +237,38 @@ default Ember.Component.extend({
         this.set('instance', instance);
     },
     renderBar: function() {
-        var instance = window.Morris.Bar(this.get('options'));
+        var _this = this;
+        if (this.instance) {
+            this.instance.on('click', null);
+        }
+        var instance = window.Morris.Bar(this.get('options')).on('click', function (index, src, x, y) {
+            _this.sendAction('clickBarCallback', index, src, x, y);
+        });
         this.set('instance', instance);
     },
     renderDonut: function() {
-        var instance = window.Morris.Donut(this.get('options'));
+        var _this = this;
+        if (this.instance) {
+            this.instance.on('click', null);
+            this.instance.on('hover', null);
+            this.instance.on('hoverOut', null);
+        }
+        var instance = window.Morris.Donut(this.get('options')).on('click', function (i, row) {
+            _this.sendAction('clickDonutSegCallback', i, row);
+        }).on('hover', function (i, row) {
+            _this.sendAction('hoverDonutSegCallback', i, row);
+        }).on('hoverOut', function (i, row) {
+            _this.sendAction('hoverOutDonutSegCallback', i, row);
+        });
         this.set('instance', instance);
+        this.attrs.donutInstance.update(instance);
     },
     listenChanges: function() {
         this.$().html('').prop('style', false);
         this.renderChart();
-    }.observes('xKey', 'labels', 'resize'),
+    }.observes('yKeys.[]','xKey', 'labels', 'resize'),
     listenDataChanges: function() {
         var instance = this.get('instance');
-        instance.setData(this.get('data'));
+        instance.setData(this.get('data'), this.get('defaultSelectData'), this.get('defaultSelectText'));
     }.observes('data.length'),
 });
