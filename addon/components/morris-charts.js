@@ -1,9 +1,16 @@
 import Ember from 'ember';
+import { debounce as runloopDebounce, cancel } from '@ember/runloop';
+import elementResizeDetectorMaker from 'element-resize-detector';
+
+const DEBOUNCE = 500;
 
 export default Ember.Component.extend({
     instance: false,
     options: {},
-
+    detector: null,
+    debounceId: null,
+    resizeCallback: null,
+    
     didInsertElement(){
         this.renderChart();
     },
@@ -13,21 +20,42 @@ export default Ember.Component.extend({
             this.instance.on('hover', null);
             this.instance.on('hoverOut', null);
         }
+        this.destroyResizeListener();
     },
-    
+    setupResizeListener(){
+        if(this.options.resizeBasedOnParent){
+            this.detector = elementResizeDetectorMaker({
+                strategy: "scroll"
+            });
+            let callBackHandler = this.drawChart.bind(this);
+            let cb = (...args) =>{
+                this.debounceId = runloopDebounce(callBackHandler, ...args, DEBOUNCE);   
+            }
+            this.resizeCallback = cb;
+            this.detector.listenTo( {}, this.element, this.resizeCallback);
+        }
+    },
+    destroyResizeListener(){
+        if(this.resizeCallback){
+            cancel(this.debounceId);
+            this.detector.removeListener(this.element, this.resizeCallback);
+        }
+    },
     renderChart(){
+        // Options
+        this.setOptions();
+        // Render chart
+        this.drawChart();
+        //handling the resize event
+        this.destroyResizeListener();
+        this.setupResizeListener();
+    },
+    drawChart(){
         var type = this.get('type');
-
         if (typeof type !== 'string') {
             return false;
         }
-
         type = type.toLowerCase();
-
-        // Options
-        this.setOptions();
-
-        // Render chart
         if (type === 'area') {
             this.renderArea();
         } else if (type === 'line') {
@@ -266,7 +294,7 @@ export default Ember.Component.extend({
     listenChanges: function() {
         this.$().html('').prop('style', false);
         this.renderChart();
-    }.observes('yKeys.[]','xKey', 'labels', 'resize'),
+    }.observes('yKeys.[]','xKey', 'labels', 'resize','options.resizeBasedOnParent'),
     listenDataChanges: function() {
         var instance = this.get('instance');
         instance.setData(this.get('data'), this.get('defaultSelectData'), this.get('defaultSelectText'));
