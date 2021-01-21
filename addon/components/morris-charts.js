@@ -25,14 +25,24 @@ export default Ember.Component.extend({
     setupResizeListener(){
         if(this.options.resizeBasedOnParent){
             this.detector = elementResizeDetectorMaker({
-                strategy: "scroll"
+                strategy: "scroll",
+                callOnAdd: false
             });
-            let callBackHandler = this.drawChart.bind(this);
+            let resizeHandler = this.resizeHandler.bind(this);
             let cb = (...args) =>{
-                this.debounceId = runloopDebounce(callBackHandler, ...args, DEBOUNCE);   
+                if (this.debounceId != null) {
+                    cancel(this.debounceId);
+                }
+                this.debounceId = runloopDebounce(resizeHandler, ...args, DEBOUNCE);   
             }
             this.resizeCallback = cb;
-            this.detector.listenTo( {}, this.element, this.resizeCallback);
+            this.detector.listenTo(this.element, this.resizeCallback);
+        }
+    },
+    resizeHandler(){
+        this.set("debounceId",null);
+        if(this.instance !== false && this.instance!== null){
+            this.instance.resizeHandler();
         }
     },
     destroyResizeListener(){
