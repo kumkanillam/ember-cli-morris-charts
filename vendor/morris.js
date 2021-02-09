@@ -1685,13 +1685,13 @@ Licensed under the BSD-2-Clause License.
                         _results.push(prevLabelMargin = startPos);
                     }
                     _labelRef.push(label);
-                } else if(row.label.includes("\n") && !row.label.includes("\n~")){
+                } else if(typeof row.label == 'string' && row.label.includes("\n") && !row.label.includes("\n~")){
                     let _labelCheck=_labelRef.length-1;
                     let _isPlaceAvailable=false;
                     for(;_labelCheck>=0;_labelCheck--){
                         if(_results[_labelCheck] !== undefined){
                             let _tempLabel = (_labelRef[_labelCheck] !== undefined && _labelRef[_labelCheck] !== null) ? _labelRef[_labelCheck].attrs !== null ? _labelRef[_labelCheck].attrs.text : undefined : undefined;
-                            if(_tempLabel !== undefined ? (_tempLabel.includes("\n") && !_tempLabel.includes("\n~")) : false){
+                            if(_tempLabel !== undefined ? (typeof  _tempLabel == 'string' && _tempLabel.includes("\n") && !_tempLabel.includes("\n~")) : false){
                                 _isPlaceAvailable = false;
                                 break;
                             }
@@ -1878,7 +1878,7 @@ Licensed under the BSD-2-Clause License.
             var content, j, row, x, y, _i, _len, _ref,text;
             row = this.data[index];
             text = row.label;
-            if(text.includes("\n~")){//here we remove the "\n~".
+            if(typeof text == 'string' && text.includes("\n~")){//here we remove the "\n~".
                 text = text.replace("\n~"," ");
             }
             content = $("<div class='morris-hover-row-label'>").text(text);
@@ -1905,11 +1905,10 @@ Licensed under the BSD-2-Clause License.
         };
 
         Bar.prototype.drawXAxisLabel = function (xPos, yPos, text) {
-            var label;
-            if(text.includes("\n~")){//here we remove the text present after the "\n~", then only we can show them without second lavel.
+            if(typeof text == 'string' && text.includes("\n~")){//here we remove the text present after the "\n~", then only we can show them without second lavel.
                 text = text.split("\n~")[0];
             }
-            return label = this.raphael.text(xPos, yPos, text).attr('font-size', this.options.gridTextSize).attr('font-family', this.options.gridTextFamily).attr('font-weight', this.options.gridTextWeight).attr('fill', this.options.gridTextColor);
+            return this.raphael.text(xPos, yPos, text).attr('font-size', this.options.gridTextSize).attr('font-family', this.options.gridTextFamily).attr('font-weight', this.options.gridTextWeight).attr('fill', this.options.gridTextColor);
         };
 
         Bar.prototype.drawBar = function (xPos, yPos, width, height, barColor, opacity, radiusArray) {
