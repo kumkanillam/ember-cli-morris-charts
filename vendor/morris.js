@@ -1585,7 +1585,8 @@ Licensed under the BSD-2-Clause License.
             xLabelMargin: 50,
             horizontal: false,
             yLogScale:false,//when enable the yLogScale the grid and Yaxes label will also disable.
-            shown: true
+            shown: true,
+            skipLowLevelLabels: false
         };
 
         Bar.prototype.calc = function () {
@@ -1674,7 +1675,10 @@ Licensed under the BSD-2-Clause License.
                     size = labelBox.height;
                     maxSize = this.el.height();
                 }
-                if (((prevLabelMargin == null) || prevLabelMargin >= startPos + size || (prevAngleMargin != null) && prevAngleMargin >= startPos) && startPos >= 0 && (startPos + size) < maxSize) {
+                let skipLabel = false;
+                if(this.options.skipLowLevelLabels == true && typeof row.label == 'string' && row.label.includes("\n~"))
+                    skipLabel = true;
+                if (!skipLabel && ((prevLabelMargin == null) || prevLabelMargin >= startPos + size || (prevAngleMargin != null) && prevAngleMargin >= startPos) && startPos >= 0 && (startPos + size) < maxSize){
                     if (angle !== 0) {
                         margin = 1.25 * this.options.gridTextSize / Math.sin(angle * Math.PI / 180.0);
                         prevAngleMargin = startPos - margin;
@@ -1685,7 +1689,7 @@ Licensed under the BSD-2-Clause License.
                         _results.push(prevLabelMargin = startPos);
                     }
                     _labelRef.push(label);
-                } else if(typeof row.label == 'string' && row.label.includes("\n") && !row.label.includes("\n~")){
+                } else if(!skipLabel && typeof row.label == 'string' && row.label.includes("\n") && !row.label.includes("\n~")){
                     let _labelCheck=_labelRef.length-1;
                     let _isPlaceAvailable=false;
                     for(;_labelCheck>=0;_labelCheck--){
