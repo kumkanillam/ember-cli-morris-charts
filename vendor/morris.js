@@ -1586,7 +1586,8 @@ Licensed under the BSD-2-Clause License.
             horizontal: false,
             yLogScale:false,//when enable the yLogScale the grid and Yaxes label will also disable.
             shown: true,
-            skipLowLevelLabels: false
+            skipLowLevelLabels: false,
+            drawValueForSingleDigit:false,//To decide the value drawing for single digit value in the top of the bar. Only suitable for normal bar chart not for stacked bar.
         };
 
         Bar.prototype.calc = function () {
@@ -1802,6 +1803,9 @@ Licensed under the BSD-2-Clause License.
                                 if (!this.options.horizontal) {
                                     this.drawBar(this.xPadding + left, top, barWidth, size, this.colorFor(row, sidx, 'bar'), this.options.barOpacity, this.options.barRadius);
                                     _results1.push(lastTop += size);
+                                    if(this.options.drawValueForSingleDigit && _ref2.length === 1 && row.y[sidx] <= 9){
+                                        this.raphael.text(this.xPadding + left + (barWidth/2), top-this.options.gridTextSize, row.y[sidx]).attr('font-size', this.options.gridTextSize).attr('font-family', this.options.gridTextFamily).attr('font-weight', this.options.gridTextWeight).attr('fill', this.options.gridTextColor);
+                                    }
                                 } else {
                                     this.drawBar(top, left, size, barWidth, this.colorFor(row, sidx, 'bar'), this.options.barOpacity, this.options.barRadius);
                                     _results1.push(lastTop -= size);
