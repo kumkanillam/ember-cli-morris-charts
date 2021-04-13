@@ -564,29 +564,28 @@ Licensed under the BSD-2-Clause License.
             } else {
                 basePos = this.getXAxisLabelY();
             }
-            if (!this.options.yLogScale) {
-                _ref1 = this.grid;
-                _results = [];
-                for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-                    lineY = _ref1[_i];
-                    pos = this.transY(lineY);
-                    if ((_ref2 = this.options.axes) === true || _ref2 === 'both' || _ref2 === 'y') {
-                        if (!this.options.horizontal) {
-                            this.drawYAxisLabel(basePos, pos, this.yAxisFormat(lineY));
-                        } else {
-                            this.drawXAxisLabel(pos, basePos, this.yAxisFormat(lineY));
-                        }
-                    }
-                    if (this.options.grid) {
-                        pos = Math.floor(pos) + 0.5;
-                        if (!this.options.horizontal) {
-                            _results.push(this.drawGridLine("M" + this.xStart + "," + pos + "H" + this.xEnd));
-                        } else {
-                            _results.push(this.drawGridLine("M" + pos + "," + this.xStart + "V" + this.xEnd));
-                        }
+            if (this.options.yLogScale && _len > 1) {
+                _len = 1;
+            }
+            for (_i = 0 ; _i < _len; _i++) {
+                lineY = _ref1[_i];
+                pos = this.transY(lineY);
+                if ((_ref2 = this.options.axes) === true || _ref2 === 'both' || _ref2 === 'y') {
+                    if (!this.options.horizontal) {
+                        this.drawYAxisLabel(basePos, pos, this.yAxisFormat(lineY));
                     } else {
-                        _results.push(void 0);
+                        this.drawXAxisLabel(pos, basePos, this.yAxisFormat(lineY));
                     }
+                }
+                if (this.options.grid) {
+                    pos = Math.floor(pos) + 0.5;
+                    if (!this.options.horizontal) {
+                        _results.push(this.drawGridLine("M" + this.xStart + "," + pos + "H" + this.xEnd));
+                    } else {
+                        _results.push(this.drawGridLine("M" + pos + "," + this.xStart + "V" + this.xEnd));
+                    }
+                } else {
+                    _results.push(void 0);
                 }
             }
             return _results;
