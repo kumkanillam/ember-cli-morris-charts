@@ -24,18 +24,18 @@ export default Ember.Component.extend({
     },
     setupResizeListener(){
         if(this.options.resizeBasedOnParent){
-            this.detector = elementResizeDetectorMaker({
+            this.set("detector", elementResizeDetectorMaker({
                 strategy: "scroll",
                 callOnAdd: false
-            });
+            }));
             let resizeHandler = this.resizeHandler.bind(this);
             let cb = (...args) =>{
                 if (this.debounceId != null) {
                     cancel(this.debounceId);
                 }
-                this.debounceId = runloopDebounce(resizeHandler, ...args, DEBOUNCE);   
+                this.set("debounceId",runloopDebounce(resizeHandler, ...args, DEBOUNCE));   
             }
-            this.resizeCallback = cb;
+            this.set("resizeCallback", cb);
             this.detector.listenTo(this.element, this.resizeCallback);
         }
     },
@@ -49,6 +49,8 @@ export default Ember.Component.extend({
         if(this.resizeCallback){
             cancel(this.debounceId);
             this.detector.removeListener(this.element, this.resizeCallback);
+            this.set("debounceId",null);
+            this.set("resizeCallback",null);
         }
     },
     renderChart(){
