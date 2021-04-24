@@ -1709,7 +1709,7 @@ Licensed under the BSD-2-Clause License.
                     }
                     if(_isPlaceAvailable || i===0){
                         if(i!==0){
-                            for(;_labelCheck>_labelRef.length;_labelCheck++){
+                            for(;_labelCheck<_labelRef.length;_labelCheck++){
                                 if(_results[_labelCheck] !== undefined){
                                     _results[_labelCheck]=undefined;
                                     _labelRef[_labelCheck].remove();
