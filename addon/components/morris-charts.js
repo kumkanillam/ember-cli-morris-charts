@@ -51,6 +51,10 @@ export default Ember.Component.extend({
         if(this.resizeCallback){
             cancel(this.debounceId);
             this.detector.removeListener(this.element, this.resizeCallback);
+            if(!this.isDestroyed){
+                this.set("debounceId",null);
+                this.set("resizeCallback",null);
+            }
         }
     },
     renderChart(){
