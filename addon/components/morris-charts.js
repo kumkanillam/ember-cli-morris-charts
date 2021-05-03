@@ -33,14 +33,16 @@ export default Ember.Component.extend({
                 if (this.debounceId != null) {
                     cancel(this.debounceId);
                 }
-                this.set("debounceId",runloopDebounce(resizeHandler, ...args, DEBOUNCE));   
+                if(!this.isDestroyed)
+                    this.set("debounceId",runloopDebounce(resizeHandler, ...args, DEBOUNCE));   
             }
             this.set("resizeCallback", cb);
             this.detector.listenTo(this.element, this.resizeCallback);
         }
     },
     resizeHandler(){
-        this.set("debounceId",null);
+        if(!this.isDestroyed)
+            this.set("debounceId",null);
         if(this.instance !== false && this.instance!== null){
             this.instance.resizeHandler();
         }
@@ -49,8 +51,10 @@ export default Ember.Component.extend({
         if(this.resizeCallback){
             cancel(this.debounceId);
             this.detector.removeListener(this.element, this.resizeCallback);
-            this.set("debounceId",null);
-            this.set("resizeCallback",null);
+            if(!this.isDestroyed){
+                this.set("debounceId",null);
+                this.set("resizeCallback",null);
+            }
         }
     },
     renderChart(){
