@@ -564,6 +564,9 @@ Licensed under the BSD-2-Clause License.
             } else {
                 basePos = this.getXAxisLabelY();
             }
+            _ref1 = this.grid;
+            _results = [];
+            _len = _ref1.length;
             if (this.options.yLogScale && _len > 1) {
                 _len = 1;
             }
