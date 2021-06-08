@@ -32,10 +32,11 @@ Licensed under the BSD-2-Clause License.
             if (this.handlers == null) {
                 this.handlers = {};
             }
-            if (this.handlers[name] == null) {
+            if (this.handlers[name] == null || handler == null) {
                 this.handlers[name] = [];
             }
-            this.handlers[name].push(handler);
+            if(handler !==  null)
+                this.handlers[name].push(handler);
             return this;
         };
 
