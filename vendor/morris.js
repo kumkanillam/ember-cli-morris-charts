@@ -333,6 +333,11 @@ Licensed under the BSD-2-Clause License.
             else if(this.ymax <= (this.ymin + 1)){
                 this.ymax = this.ymin+2;
             }
+            if(this.options.yLogScale){//To prevent the logarithmic caluculations going above the max height of the chart. because the log(1) = 0 so we need to have greater than 1 to calculate the height.
+                this.ymax += 1;
+                if(this.ymax < 5)
+                    this.ymax += 1;
+            }
             if (((_ref1 = this.options.axes) === true || _ref1 === 'both' || _ref1 === 'y') || this.options.grid === true) {
                 if (this.options.ymax === this.gridDefaults.ymax && this.options.ymin === this.gridDefaults.ymin) {
                     this.grid = this.autoGridLines(this.ymin, this.ymax, this.options.numLines);
@@ -568,10 +573,10 @@ Licensed under the BSD-2-Clause License.
             _ref1 = this.grid;
             _results = [];
             _len = _ref1.length;
-            if (this.options.yLogScale && _len > 1) {
-                _len = 1;
-            }
             for (_i = 0 ; _i < _len; _i++) {
+                if (this.options.yLogScale && (_i > 0 && _i < _len-1)) {
+                    continue;
+                }
                 lineY = _ref1[_i];
                 pos = this.transY(lineY);
                 if ((_ref2 = this.options.axes) === true || _ref2 === 'both' || _ref2 === 'y') {
