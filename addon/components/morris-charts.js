@@ -314,5 +314,6 @@ export default Ember.Component.extend({
     listenDataChanges: function() {
         var instance = this.get('instance');
         instance.setData(this.get('data'), this.get('defaultSelectData'), this.get('defaultSelectText'));
+        this.onDataChange?.();
     }.observes('data.length'),
 });
