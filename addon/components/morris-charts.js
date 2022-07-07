@@ -10,6 +10,7 @@ export default Ember.Component.extend({
     detector: null,
     debounceId: null,
     resizeCallback: null,
+    showLabelOnHover : false,
     
     didInsertElement(){
         this.renderChart();
@@ -300,6 +301,9 @@ export default Ember.Component.extend({
         var instance = window.Morris.Donut(this.get('options')).on('click', function (i, row) {
             _this.sendAction('clickDonutSegCallback', i, row);
         }).on('hover', function (i, row) {
+            if(_this.showLabelOnHover && !(_this.instance.segments[i].seg[0].hasAttribute("title") || _this.instance.segments[i].seg[0].hasAttribute("droid-title"))){
+                _this.instance.segments[i].seg[0].setAttribute("title",row.label);
+            }
             _this.sendAction('hoverDonutSegCallback', i, row);
         }).on('hoverOut', function (i, row) {
             _this.sendAction('hoverOutDonutSegCallback', i, row);
