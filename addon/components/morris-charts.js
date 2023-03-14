@@ -302,7 +302,8 @@ export default Ember.Component.extend({
             _this.sendAction('clickDonutSegCallback', i, row);
         }).on('hover', function (i, row) {
             if(_this.showLabelOnHover && !(_this.instance.segments[i].seg[0].hasAttribute("title") || _this.instance.segments[i].seg[0].hasAttribute("droid-title"))){
-                _this.instance.segments[i].seg[0].setAttribute("title",row.label);
+                let title= `${row.label} : ${row.value}`;
+                _this.instance.segments[i].seg[0].setAttribute("title",title);
             }
             _this.sendAction('hoverDonutSegCallback', i, row);
         }).on('hoverOut', function (i, row) {
