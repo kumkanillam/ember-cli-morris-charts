@@ -1,6 +1,5 @@
 import Ember from 'ember';
 import { debounce as runloopDebounce, cancel } from '@ember/runloop';
-import elementResizeDetectorMaker from 'element-resize-detector';
 
 const DEBOUNCE = 500;
 
