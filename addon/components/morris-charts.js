@@ -11,6 +11,7 @@ export default Ember.Component.extend({
     debounceId: null,
     resizeCallback: null,
     showLabelOnHover : false,
+    test:false,
     
     didInsertElement(){
         this.renderChart();
