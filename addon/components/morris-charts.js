@@ -1,9 +1,11 @@
-import Ember from 'ember';
+import Component from '@ember/component';
 import { debounce as runloopDebounce, cancel } from '@ember/runloop';
+import { addObserver } from '@ember/object/observers';
+
 
 const DEBOUNCE = 500;
 
-export default Ember.Component.extend({
+export default Component.extend({
     instance: false,
     options: {},
     detector: null,
@@ -14,6 +16,12 @@ export default Ember.Component.extend({
     
     didInsertElement(){
         this.renderChart();
+    },
+
+    init() {
+        this._super(...arguments);
+        addObserver(this,'yKeys.[]','xKey', 'labels', 'resize','options.resizeBasedOnParent', this.listenChanges);
+        addObserver(this, 'data.length', this.listenDataChanges);
     },
     willDestroyElement(){
         if (this.instance) {
@@ -86,7 +94,7 @@ export default Ember.Component.extend({
     setOptions: function() {
         var options = this.get('options');
 
-        options.element = this.$().attr('id');
+        options.element = $(this.element).attr('id');
         options.data = this.get('data');
         options.ykeys = this.get('resize') ? this.get('resize') : false;
 
@@ -287,7 +295,7 @@ export default Ember.Component.extend({
             this.instance.on('click', null);
         }
         var instance = window.Morris.Bar(this.get('options')).on('click', function (index, src, x, y) {
-            _this.sendAction('clickBarCallback', index, src, x, y);
+            _this.clickBarCallback?.(index, src, x, y);
         });
         this.set('instance', instance);
     },
@@ -299,26 +307,26 @@ export default Ember.Component.extend({
             this.instance.on('hoverOut', null);
         }
         var instance = window.Morris.Donut(this.get('options')).on('click', function (i, row) {
-            _this.sendAction('clickDonutSegCallback', i, row);
+            _this.clickDonutSegCallback?.(i, row);
         }).on('hover', function (i, row) {
             if(_this.showLabelOnHover && !(_this.instance.segments[i].seg[0].hasAttribute("title") || _this.instance.segments[i].seg[0].hasAttribute("droid-title"))){
                 let title= `${row.label} : ${row.value}`;
                 _this.instance.segments[i].seg[0].setAttribute("title",title);
             }
-            _this.sendAction('hoverDonutSegCallback', i, row);
+            _this.hoverDonutSegCallback?.(i, row);
         }).on('hoverOut', function (i, row) {
-            _this.sendAction('hoverOutDonutSegCallback', i, row);
+            _this.hoverOutDonutSegCallback?.(i, row);
         });
         this.set('instance', instance);
         this.attrs.donutInstance.update(instance);
     },
     listenChanges: function() {
-        this.$().html('').prop('style', false);
+        $(this.element).html('').prop('style', false);
         this.renderChart();
-    }.observes('yKeys.[]','xKey', 'labels', 'resize','options.resizeBasedOnParent'),
+    },
     listenDataChanges: function() {
         var instance = this.get('instance');
         instance.setData(this.get('data'), this.get('defaultSelectData'), this.get('defaultSelectText'));
         this.onDataChange?.();
-    }.observes('data.length'),
+    }
 });
