@@ -20,8 +20,8 @@ export default Component.extend({
 
     init() {
         this._super(...arguments);
-        addObserver(this,'yKeys.[]','xKey', 'labels', 'resize','options.resizeBasedOnParent', this.listenChanges);
-        addObserver(this, 'data.length', this.listenDataChanges);
+        addObserver(this,'yKeys.[]','xKey', 'labels', 'resize','options.resizeBasedOnParent', this.listenChanges.bind(this));
+        addObserver(this, 'data.length', this.listenDataChanges.bind(this));
     },
     willDestroyElement(){
         if (this.instance) {
