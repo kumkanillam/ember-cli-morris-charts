@@ -91,10 +91,8 @@ export default Component.extend({
          * that's why we initially render the chart from the body element and after rendering and repainting, we remove the chart from the body element
          * and append it to the target element
          */
-        setTimeout(() => {
-            document.body.removeChild(this.options.element);
-            this.element.appendChild(this.options.element);
-        });
+        document.body.removeChild(this.options.element);
+        this.element.appendChild(this.options.element);
     },
     drawChart(){
         var type = this.get('type');
