@@ -1,6 +1,6 @@
 import Component from '@ember/component';
 import { debounce as runloopDebounce, cancel } from '@ember/runloop';
-import { addObserver } from '@ember/object/observers';
+import { addObserver, removeObserver } from '@ember/object/observers';
 
 
 const DEBOUNCE = 500;
@@ -20,7 +20,12 @@ export default Component.extend({
 
     init() {
         this._super(...arguments);
-        addObserver(this,'yKeys.[]','xKey', 'labels', 'resize','options.resizeBasedOnParent', this.listenChanges.bind(this));
+        const listenChanges = this.listenChanges.bind(this);
+        addObserver(this, 'yKeys.[]', listenChanges);
+        addObserver(this, 'xKey', listenChanges);
+        addObserver(this, 'labels', listenChanges);
+        addObserver(this, 'resize', listenChanges);
+        addObserver(this, 'options.resizeBasedOnParent', listenChanges);
         addObserver(this, 'data.length', this.listenDataChanges.bind(this));
     },
     willDestroyElement(){
@@ -30,6 +35,13 @@ export default Component.extend({
             this.instance.on('hoverOut', null);
         }
         this.destroyResizeListener();
+        const listenChanges = this.listenChanges.bind(this);
+        removeObserver(this, 'yKeys.[]', listenChanges);
+        removeObserver(this, 'xKey', listenChanges);
+        removeObserver(this, 'labels', listenChanges);
+        removeObserver(this, 'resize', listenChanges);
+        removeObserver(this, 'options.resizeBasedOnParent', listenChanges);
+        removeObserver(this, 'data.length', this.listenDataChanges.bind(this));
     },
     setupResizeListener(){
         if(this.options.resizeBasedOnParent){
@@ -74,6 +86,15 @@ export default Component.extend({
         //handling the resize event
         this.destroyResizeListener();
         this.setupResizeListener();
+        /**
+         * If we render the svg elements directly from inside the target element "this.element", the rendering is very slow
+         * that's why we initially render the chart from the body element and after rendering and repainting, we remove the chart from the body element
+         * and append it to the target element
+         */
+        setTimeout(() => {
+            document.body.removeChild(this.options.element);
+            this.element.appendChild(this.options.element);
+        });
     },
     drawChart(){
         var type = this.get('type');
@@ -93,8 +114,13 @@ export default Component.extend({
     },
     setOptions: function() {
         var options = this.get('options');
-
-        options.element = $(this.element).attr('id');
+        const element = document.createElement("div");
+        //we need to attach the element to any dom element so that the svg rendering is smooth as expected
+        document.body.appendChild(element);
+        const parentRect = this.element.getBoundingClientRect();
+        element.style.width = parentRect.width + "px";
+        element.style.height = parentRect.height + "px";
+        options.element = element;
         options.data = this.get('data');
         options.ykeys = this.get('resize') ? this.get('resize') : false;
 
