@@ -1,6 +1,5 @@
 import Component from '@ember/component';
 import { debounce as runloopDebounce, cancel } from '@ember/runloop';
-import { addObserver, removeObserver } from '@ember/object/observers';
 
 
 const DEBOUNCE = 500;
@@ -20,13 +19,12 @@ export default Component.extend({
 
     init() {
         this._super(...arguments);
-        const listenChanges = this.listenChanges.bind(this);
-        addObserver(this, 'yKeys.[]', listenChanges);
-        addObserver(this, 'xKey', listenChanges);
-        addObserver(this, 'labels', listenChanges);
-        addObserver(this, 'resize', listenChanges);
-        addObserver(this, 'options.resizeBasedOnParent', listenChanges);
-        addObserver(this, 'data.length', this.listenDataChanges.bind(this));
+        this.addObserver('yKeys.[]', this, "listenChanges");
+        this.addObserver('xKey', this, "listenChanges");
+        this.addObserver('labels', this, "listenChanges");
+        this.addObserver('resize', this, "listenChanges");
+        this.addObserver('options.resizeBasedOnParent', this, "listenChanges");
+        this.addObserver('data.length', this, "listenDataChanges");
     },
     willDestroyElement(){
         if (this.instance) {
@@ -35,13 +33,12 @@ export default Component.extend({
             this.instance.on('hoverOut', null);
         }
         this.destroyResizeListener();
-        const listenChanges = this.listenChanges.bind(this);
-        removeObserver(this, 'yKeys.[]', listenChanges);
-        removeObserver(this, 'xKey', listenChanges);
-        removeObserver(this, 'labels', listenChanges);
-        removeObserver(this, 'resize', listenChanges);
-        removeObserver(this, 'options.resizeBasedOnParent', listenChanges);
-        removeObserver(this, 'data.length', this.listenDataChanges.bind(this));
+        this.removeObserver('yKeys.[]', this, "listenChanges");
+        this.removeObserver('xKey', this, "listenChanges");
+        this.removeObserver('labels', this, "listenChanges");
+        this.removeObserver('resize', this, "listenChanges");
+        this.removeObserver('options.resizeBasedOnParent', this, "listenChanges");
+        this.removeObserver('data.length', this, "listenDataChanges");
     },
     setupResizeListener(){
         if(this.options.resizeBasedOnParent){
