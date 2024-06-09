@@ -1,5 +1,5 @@
 import Component from '@ember/component';
-import { debounce as runloopDebounce, cancel } from '@ember/runloop';
+import { debounce as runloopDebounce, cancel, once } from '@ember/runloop';
 
 
 const DEBOUNCE = 500;
@@ -24,7 +24,7 @@ export default Component.extend({
         this.addObserver('labels', this, "listenChanges");
         this.addObserver('resize', this, "listenChanges");
         this.addObserver('options.resizeBasedOnParent', this, "listenChanges");
-        this.addObserver('data.length', this, "listenDataChanges");
+        this.addObserver('data.length', this, "listenChanges");
     },
     willDestroyElement(){
         if (this.instance) {
@@ -38,7 +38,7 @@ export default Component.extend({
         this.removeObserver('labels', this, "listenChanges");
         this.removeObserver('resize', this, "listenChanges");
         this.removeObserver('options.resizeBasedOnParent', this, "listenChanges");
-        this.removeObserver('data.length', this, "listenDataChanges");
+        this.removeObserver('data.length', this, "listenChanges");
     },
     setupResizeListener(){
         if(this.options.resizeBasedOnParent){
@@ -342,12 +342,20 @@ export default Component.extend({
         this.attrs.donutInstance.update(instance);
     },
     listenChanges: function() {
+        once(this, "_listenChanges");
+    },
+    _listenChanges: function() {
+        if(this.isDestroying || this.isDestroyed) {
+            return;
+        }
+
         $(this.element).html('').prop('style', false);
         this.renderChart();
-    },
-    listenDataChanges: function() {
-        var instance = this.get('instance');
-        instance.setData(this.get('data'), this.get('defaultSelectData'), this.get('defaultSelectText'));
         this.onDataChange?.();
-    }
+    },
+    // listenDataChanges: function() {
+    //     var instance = this.get('instance');
+    //     instance.setData(this.get('data'), this.get('defaultSelectData'), this.get('defaultSelectText'));
+    //     this.onDataChange?.();
+    // }
 });
