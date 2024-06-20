@@ -88,8 +88,8 @@ export default Component.extend({
          * that's why we initially render the chart from the body element and after rendering and repainting, we remove the chart from the body element
          * and append it to the target element
          */
-        document.body.removeChild(this.options.element);
-        this.element.appendChild(this.options.element);
+        // document.body.removeChild(this.options.element);
+        // this.element.appendChild(this.options.element);
     },
     drawChart(){
         var type = this.get('type');
@@ -109,12 +109,13 @@ export default Component.extend({
     },
     setOptions: function() {
         var options = this.get('options');
-        const element = document.createElement("div");
+        // const element = document.createElement("div");
+        const element = this.element;
         //we need to attach the element to any dom element so that the svg rendering is smooth as expected
-        document.body.appendChild(element);
-        const parentRect = this.element.getBoundingClientRect();
-        element.style.width = parentRect.width + "px";
-        element.style.height = parentRect.height + "px";
+        // document.body.appendChild(element);
+        // const parentRect = this.element.getBoundingClientRect();
+        // element.style.width = parentRect.width + "px";
+        // element.style.height = parentRect.height + "px";
         options.element = element;
         options.data = this.get('data');
         options.ykeys = this.get('resize') ? this.get('resize') : false;
